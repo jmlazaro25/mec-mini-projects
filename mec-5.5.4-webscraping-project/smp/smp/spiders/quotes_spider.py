@@ -40,7 +40,7 @@ class XpathQuotesSpider(scrapy.Spider):
                 'tags': quote.xpath('./div[@class="tags"]/a[@class="tag"]/text()').getall(),
             }
 
-        for a in response.xpath('//li[@class="next"]/a/@href').getall():
+        for a in response.xpath('.//li[@class="next"]/a/@href').getall():
             yield response.follow(a, callback=self.parse)
 
 class AuthorSpider(scrapy.Spider):
