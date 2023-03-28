@@ -14,13 +14,15 @@ class CSSQuotesSpider(scrapy.Spider):
     def parse(self, response):
         for quote in response.css('div.quote'):
             yield {
-                'text': quote.css('span.text::text').get(),
-                'author': quote.css('span small::text').get(),
-                'tags': quote.css('div.tags a.tag::text').getall(),
+                'text': quote.css('span.text::text').get()[1:-1],
+                'author': quote.css('small.author::text').get(),
+                'tags': quote.css('div.tags a.tag::text').getall()
             }
 
-        for a in response.css('ul.pager a'):
-            yield response.follow(a, callback=self.parse)
+        next_page = response.css('li.next a::attr(href)').get()
+        if next_page is not None:
+            yield response.follow(next_page, self.parse)
+
 
 class XpathQuotesSpider(scrapy.Spider):
     name = "toscrape-xpath"
@@ -35,7 +37,7 @@ class XpathQuotesSpider(scrapy.Spider):
     def parse(self, response):
         for quote in response.xpath('//div[@class="quote"]'):
             yield {
-                'text': quote.xpath('./span[@class="text"]/text()').get(),
+                'text': quote.xpath('./span[@class="text"]/text()').get()[1:-1],
                 'author': quote.xpath('.//small[@class="author"]/text()').get(),
                 'tags': quote.xpath('./div[@class="tags"]/a[@class="tag"]/text()').getall(),
             }
@@ -64,4 +66,3 @@ class AuthorSpider(scrapy.Spider):
             'birthdate': extract_with_css('.author-born-date::text'),
             'bio': extract_with_css('.author-description::text'),
         }
-
